@@ -112,7 +112,7 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 	protected final void shrinkToSize(int desiredSize) {
 
 		while (size() > desiredSize) {
-
+			System.out.println("Shrinking");
 			// Log.info(getClass(), "desiredSize = " + desiredSize + " size=" +
 			// size());
 			removeLeastValuableNode();

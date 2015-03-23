@@ -25,7 +25,7 @@ class LruCache extends AbstractPolicyCache implements ReapableCache
 
     protected CacheNode findNodeByKey(Object key)
     {
-        return (LruNode) map.get(key);
+		return (CacheNode) map.get(key);
     }
 
 

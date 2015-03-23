@@ -25,24 +25,25 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 	}
 
 	@Override
-	protected SxLruNode findNodeByKey(Object key) {
-		SxLruNode sxLruNode = null;
+	protected LruNode findNodeByKey(Object key) {
+		LruNode lruNode = null;
 		for (LruCache lruCache : xlruCaches) {
-			sxLruNode = (SxLruNode) lruCache.findNodeByKey(key);
-			if (sxLruNode != null)
-				return sxLruNode;
+			lruNode = (LruNode) lruCache.findNodeByKey(key);
+			if (lruNode != null)
+				return lruNode;
 		}
 		return null;
 	}
 
 	public void addObject(Object userKey, Object cacheObject) {
-
+		System.out.println("\nAdding Objectz");
 		CacheNode node;
 		total += 1;
 
 		node = findNodeByKey(userKey);
 
 		if (node != null) {
+			System.out.println("Found");
 
 			// if the node exists, then set it's value, and revalue it.
 			// this is better than deleting it, because it doesn't require
@@ -51,6 +52,7 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 			node.setValue(cacheObject);
 			revalueNode(node);
 		} else {
+			System.out.println("Not Found");
 			missRatio += 1;
 			shrinkToSize(getMaxSize() - 1);
 			createNode(userKey, cacheObject);
@@ -63,14 +65,14 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 
 	@Override
 	protected void revalueNode(CacheNode node) {
-		SxLruNode xlruNode = (SxLruNode) node;
-		LruCache lruCache = xlruCaches.get(xlruNode.getCacheNumber());
-		if (xlruNode.getCacheNumber() == x - 1) {
-			lruCache.revalueNode(xlruNode);
+		LruNode lruNode = (LruNode) node;
+		LruCache lruCache = xlruCaches.get(lruNode.getCacheNumber());
+		if (lruNode.getCacheNumber() == x - 1) {
+			lruCache.revalueNode(lruNode);
 		} else {
-			lruCache.delete(xlruNode);
-			xlruCaches.get(xlruNode.getCacheNumber() + 1).addObject(
-					xlruNode.getValue(), new Integer(1));
+			lruCache.delete(lruNode);
+			xlruCaches.get(lruNode.getCacheNumber() + 1).addObject(
+					lruNode.getValue(), new Integer(1));
 		}
 	}
 
@@ -93,8 +95,7 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 
 	@Override
 	protected CacheNode createNode(Object userKey, Object cacheObject) {
-		// TODO Auto-generated method stub
-		return null;
+		return xlruCaches.get(0).createNode(userKey, cacheObject);
 	}
 
 }

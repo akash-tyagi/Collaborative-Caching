@@ -21,7 +21,8 @@ public class TestCache {
 		LruCache cache = new LruCache("lru", 5000, 60000);
 		LfuCache cache_lfu = new LfuCache("lfu", 5000, 60000);
 		FifoCache cache_fifo = new FifoCache("fifo", 5000, 60000);
-		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 60000, 1);
+		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 60000, 2);
+		System.out.println("1");
 
 		// Nikhil Start
 		String target_dir = "/home/akash/workspace/CollaborativeCache/src/test";
@@ -64,12 +65,12 @@ public class TestCache {
 								// And now we have random access to everything
 								// in the object
 								// System.out.println(node.getValueAsText());
-								cache.addObject(node.getValueAsText(),
-										new Integer(1));
-								cache_lfu.addObject(node.getValueAsText(),
-										new Integer(1));
-								cache_fifo.addObject(node.getValueAsText(),
-										new Integer(1));
+//								cache.addObject(node.getValueAsText(),
+//										new Integer(1));
+//								cache_lfu.addObject(node.getValueAsText(),
+//										new Integer(1));
+//								cache_fifo.addObject(node.getValueAsText(),
+//										new Integer(1));
 								cache_sxlru.addObject(node.getValueAsText(),
 										new Integer(1));
 							}
@@ -88,12 +89,12 @@ public class TestCache {
 
 		}
 
-		System.out.println("LRU");
-		cache.CacheHitRatio();
-		System.out.println("LFU");
-		cache_lfu.CacheHitRatio();
-		System.out.println("FIFO");
-		cache_fifo.CacheHitRatio();
+		// System.out.println("LRU");
+		// cache.CacheHitRatio();
+		// System.out.println("LFU");
+		// cache_lfu.CacheHitRatio();
+		// System.out.println("FIFO");
+		// cache_fifo.CacheHitRatio();
 		System.out.println("SxLru");
 		cache_sxlru.CacheHitRatio();
 
