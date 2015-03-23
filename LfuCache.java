@@ -1,8 +1,5 @@
 package CacheImprovement;
 
-
-
-
 //import org.shiftone.cache.util.*;
 //import org.shiftone.cache.util.reaper.ReapableCache;
 
@@ -10,226 +7,197 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Class LfuCache
  *
  * @author <a href="mailto:jeff@shiftone.org">Jeff Drost</a>
  * @version $Revision: 1.7 $
  */
-class LfuCache extends AbstractPolicyCache implements ReapableCache
-{
+class LfuCache extends AbstractPolicyCache implements ReapableCache {
 
-    private static final Log LOG = new Log(LfuCache.class);
-    private final Map        map;
-    private final LinkedList fifo;
-    private final List       lrus;
-    private int              maxLruBuckets = 0;
+	private static final Log LOG = new Log(LfuCache.class);
+	private final Map map;
+	private final LinkedList fifo;
+	private final List lrus;
+	private int maxLruBuckets = 0;
 
-    // when searching for a node to remove, the lowest lru bucked is checked
-    // then then next, etc etc.  In some rare cases, we have extra information that
-    // would allow a higher bucket to be used to start the search.
-    // This is a minor optimizaton.
-    private int lowestNonEmptyLru = 0;
+	// when searching for a node to remove, the lowest lru bucked is checked
+	// then then next, etc etc. In some rare cases, we have extra information
+	// that
+	// would allow a higher bucket to be used to start the search.
+	// This is a minor optimizaton.
+	private int lowestNonEmptyLru = 0;
 
-    public LfuCache(String name, long timeoutMilliSeconds, int maxSize)
-    {
+	public LfuCache(String name, long timeoutMilliSeconds, int maxSize) {
 
-        super(name, timeoutMilliSeconds, maxSize);
+		super(name, timeoutMilliSeconds, maxSize);
 
-        map           = MapFactory.createMap(maxSize);
-        fifo          = new LinkedList();
-        lrus          = new ArrayList(5);
-        maxLruBuckets = maxSize * 3;
-    }
+		map = MapFactory.createMap(maxSize);
+		fifo = new LinkedList();
+		lrus = new ArrayList(5);
+		maxLruBuckets = maxSize * 3;
+	}
 
+	protected final LinkedList lru(int numUsageIndex) {
 
-    protected final LinkedList lru(int numUsageIndex)
-    {
+		LinkedList lru = null;
+		int lruIndex = Math.min(maxLruBuckets, numUsageIndex);
 
-        LinkedList lru      = null;
-        int        lruIndex = Math.min(maxLruBuckets, numUsageIndex);
+		if (lruIndex >= lrus.size()) {
+			lru = new LinkedList();
 
-        if (lruIndex >= lrus.size())
-        {
-            lru = new LinkedList();
+			lrus.add(lruIndex, lru);
+		} else {
+			lru = (LinkedList) lrus.get(lruIndex);
+		}
 
-            lrus.add(lruIndex, lru);
-        }
-        else
-        {
-            lru = (LinkedList) lrus.get(lruIndex);
-        }
+		return lru;
+	}
 
-        return lru;
-    }
+	public int size() {
+		return map.size();
+	}
 
+	protected CacheNode findNodeByKey(Object key) {
+		return (LfuNode) map.get(key);
+	}
 
-    public int size()
-    {
-        return map.size();
-    }
+	protected void revalueNode(CacheNode cacheNode) {
 
+		LfuNode node = (LfuNode) cacheNode;
+		LinkedListNode lln = node.lfuNode;
+		LinkedList currBucket = lru(node.numUsages);
+		LinkedList nextBucket = lru(++node.numUsages);
 
-    protected CacheNode findNodeByKey(Object key)
-    {
-        return (LfuNode) map.get(key);
-    }
+		currBucket.remove(lln);
 
+		node.lfuNode = nextBucket.addFirst(lln.getValue());
+	}
 
-    protected void revalueNode(CacheNode cacheNode)
-    {
+	protected void delete(CacheNode cacheNode) {
 
-        LfuNode        node       = (LfuNode) cacheNode;
-        LinkedListNode lln        = node.lfuNode;
-        LinkedList     currBucket = lru(node.numUsages);
-        LinkedList     nextBucket = lru(++node.numUsages);
+		LfuNode node = (LfuNode) cacheNode;
 
-        currBucket.remove(lln);
+		fifo.remove(node.fifoNode);
+		lru(node.numUsages).remove(node.lfuNode);
+		map.remove(node.key);
+	}
 
-        node.lfuNode = nextBucket.addFirst(lln.getValue());
-    }
+	protected LinkedList getLowestNonEmptyLru() {
 
+		LinkedList lru = null;
 
-    protected void delete(CacheNode cacheNode)
-    {
+		for (int i = lowestNonEmptyLru; i < lrus.size(); i++) {
+			lru = lru(i);
 
-        LfuNode node = (LfuNode) cacheNode;
+			if (lru.size() != 0) {
+				lowestNonEmptyLru = i;
 
-        fifo.remove(node.fifoNode);
-        lru(node.numUsages).remove(node.lfuNode);
-        map.remove(node.key);
-    }
+				return lru;
+			}
+		}
 
+		return lru;
+	}
 
-    protected LinkedList getLowestNonEmptyLru()
-    {
+	protected void removeLeastValuableNode() {
 
-        LinkedList lru = null;
+		LinkedList lfu = getLowestNonEmptyLru();
+		LinkedListNode lln = lfu.peekLast();
+		LfuNode node = (LfuNode) lln.getValue();
 
-        for (int i = lowestNonEmptyLru; i < lrus.size(); i++)
-        {
-            lru = lru(i);
+		delete(node);
+	}
 
-            if (lru.size() != 0)
-            {
-                lowestNonEmptyLru = i;
+	protected CacheNode createNode(Object userKey, Object cacheObject) {
 
-                return lru;
-            }
-        }
+		LfuNode node = null;
 
-        return lru;
-    }
+		node = new LfuNode();
+		node.key = userKey;
+		node.value = cacheObject;
+		node.fifoNode = fifo.addFirst(node);
+		node.lfuNode = lru(0).addFirst(node);
+		node.timeoutTime = System.currentTimeMillis()
+				+ getTimeoutMilliSeconds();
+		lowestNonEmptyLru = 0;
 
+		map.put(userKey, node);
 
-    protected void removeLeastValuableNode()
-    {
+		return node;
+	}
 
-        LinkedList     lfu  = getLowestNonEmptyLru();
-        LinkedListNode lln  = lfu.peekLast();
-        LfuNode        node = (LfuNode) lln.getValue();
+	public void removeExpiredElements() {
 
-        delete(node);
-    }
+		LinkedListNode lln = null;
+		LfuNode node = null;
 
+		while ((lln = fifo.peekLast()) != null) {
+			lln = fifo.peekLast();
+			node = (LfuNode) lln.getValue();
 
-    protected CacheNode createNode(Object userKey, Object cacheObject)
-    {
+			if (node.isExpired()) {
+				delete(node);
+			} else {
 
-        LfuNode node = null;
+				// not expired.. can stop now
+				break;
+			}
+		}
+	}
 
-        node              = new LfuNode();
-        node.key          = userKey;
-        node.value        = cacheObject;
-        node.fifoNode     = fifo.addFirst(node);
-        node.lfuNode      = lru(0).addFirst(node);
-        node.timeoutTime  = System.currentTimeMillis() + getTimeoutMilliSeconds();
-        lowestNonEmptyLru = 0;
+	// ------------------------------------------------------------------------
+	String dumpLfuKeys() {
 
-        map.put(userKey, node);
+		String dump = null;
+		StringBuffer sb = new StringBuffer();
+		LinkedListNode node = null; // lfu.peekFirst();
+		LfuNode current = null;
 
-        return node;
-    }
+		for (int i = lrus.size() - 1; i >= 0; i--) {
+			node = lru(i).peekFirst();
 
+			while (node != null) {
+				current = (LfuNode) node.getValue();
 
-    public void removeExpiredElements()
-    {
+				sb.append(current.key);
 
-        LinkedListNode lln  = null;
-        LfuNode        node = null;
+				node = node.getNext();
+			}
+		}
 
-        while ((lln = fifo.peekLast()) != null)
-        {
-            lln  = fifo.peekLast();
-            node = (LfuNode) lln.getValue();
+		dump = sb.toString();
 
-            if (node.isExpired())
-            {
-                delete(node);
-            }
-            else
-            {
+		LOG.debug("dumpLfuKeys : " + dump);
 
-                // not expired.. can stop now
-                break;
-            }
-        }
-    }
+		return dump;
+	}
 
+	String dumpFifoKeys() {
 
-    //------------------------------------------------------------------------
-    String dumpLfuKeys()
-    {
+		String dump = null;
+		StringBuffer sb = new StringBuffer();
+		LinkedListNode node = fifo.peekFirst();
+		LfuNode current = null;
 
-        String         dump    = null;
-        StringBuffer   sb      = new StringBuffer();
-        LinkedListNode node    = null;    //lfu.peekFirst();
-        LfuNode        current = null;
+		while (node != null) {
+			current = (LfuNode) node.getValue();
 
-        for (int i = lrus.size() - 1; i >= 0; i--)
-        {
-            node = lru(i).peekFirst();
+			sb.append(current.key);
 
-            while (node != null)
-            {
-                current = (LfuNode) node.getValue();
+			node = node.getNext();
+		}
 
-                sb.append(current.key);
+		dump = sb.toString();
 
-                node = node.getNext();
-            }
-        }
+		LOG.debug("dumpFifoKeys : " + dump);
 
-        dump = sb.toString();
+		return dump;
+	}
 
-        LOG.debug("dumpLfuKeys : " + dump);
-
-        return dump;
-    }
-
-
-    String dumpFifoKeys()
-    {
-
-        String         dump    = null;
-        StringBuffer   sb      = new StringBuffer();
-        LinkedListNode node    = fifo.peekFirst();
-        LfuNode        current = null;
-
-        while (node != null)
-        {
-            current = (LfuNode) node.getValue();
-
-            sb.append(current.key);
-
-            node = node.getNext();
-        }
-
-        dump = sb.toString();
-
-        LOG.debug("dumpFifoKeys : " + dump);
-
-        return dump;
-    }
+	@Override
+	protected CacheNode createNode(Object userKey, Object cacheObject, int x) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

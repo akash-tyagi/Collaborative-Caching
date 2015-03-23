@@ -34,7 +34,7 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 		this.maxSize = maxSize;
 	}
 
-	public void addObject(Object userKey, Object cacheObject) {
+	public void addObject(Object userKey, Object cacheObject, int x) {
 
 		CacheNode node;
 		total += 1;
@@ -52,12 +52,16 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 		} else {
 			missRatio += 1;
 			shrinkToSize(getMaxSize() - 1);
-			createNode(userKey, cacheObject);
+			createNode(userKey, cacheObject, x);
 		}
 
 		removeExpiredElements();
 
 		// checkFreeMemory();
+	}
+
+	public void addObject(Object userKey, Object cacheObject) {
+		addObject(userKey, cacheObject, 0);
 	}
 
 	public final Object getObject(Object key) {
@@ -183,7 +187,12 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 
 	/**
 	 * Create a new node.
+	 * 
+	 * @param x
 	 */
+	abstract protected CacheNode createNode(Object userKey, Object cacheObject,
+			int x);
+
 	abstract protected CacheNode createNode(Object userKey, Object cacheObject);
 
 	private static String shortName(Class klass) {

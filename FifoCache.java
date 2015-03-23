@@ -132,4 +132,11 @@ class FifoCache extends AbstractPolicyCache implements ReapableCache
 
         return dump;
     }
+
+
+	@Override
+	protected CacheNode createNode(Object userKey, Object cacheObject, int x) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -18,10 +18,10 @@ public class TestCache {
 	 */
 	public static void testLru5() throws Exception {
 
-		LruCache cache = new LruCache("lru", 5000, 60000);
+		LruCache cache_lru = new LruCache("lru", 5000, 60000);
 		LfuCache cache_lfu = new LfuCache("lfu", 5000, 60000);
 		FifoCache cache_fifo = new FifoCache("fifo", 5000, 60000);
-		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 60000, 2);
+		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 10, 5);
 		System.out.println("1");
 
 		// Nikhil Start
@@ -65,12 +65,14 @@ public class TestCache {
 								// And now we have random access to everything
 								// in the object
 								// System.out.println(node.getValueAsText());
-//								cache.addObject(node.getValueAsText(),
-//										new Integer(1));
-//								cache_lfu.addObject(node.getValueAsText(),
-//										new Integer(1));
-//								cache_fifo.addObject(node.getValueAsText(),
-//										new Integer(1));
+								System.out.println("\n\nObject "
+										+ node.getValueAsText());
+								cache_lru.addObject(node.getValueAsText(),
+										new Integer(1));
+								// cache_lfu.addObject(node.getValueAsText(),
+								// new Integer(1));
+								// cache_fifo.addObject(node.getValueAsText(),
+								// new Integer(1));
 								cache_sxlru.addObject(node.getValueAsText(),
 										new Integer(1));
 							}
@@ -89,8 +91,8 @@ public class TestCache {
 
 		}
 
-		// System.out.println("LRU");
-		// cache.CacheHitRatio();
+		System.out.println("LRU");
+		cache_lru.CacheHitRatio();
 		// System.out.println("LFU");
 		// cache_lfu.CacheHitRatio();
 		// System.out.println("FIFO");

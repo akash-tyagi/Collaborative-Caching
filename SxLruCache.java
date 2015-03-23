@@ -29,33 +29,33 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 		LruNode lruNode = null;
 		for (LruCache lruCache : xlruCaches) {
 			lruNode = (LruNode) lruCache.findNodeByKey(key);
-			if (lruNode != null)
+			if (lruNode != null) {
+				System.out.println("Name:" + lruCache.name);
 				return lruNode;
+			}
 		}
 		return null;
 	}
 
 	public void addObject(Object userKey, Object cacheObject) {
-		System.out.println("\nAdding Objectz");
 		CacheNode node;
 		total += 1;
 
 		node = findNodeByKey(userKey);
 
 		if (node != null) {
-			System.out.println("Found");
-
+			System.out.println("Found " + userKey);
 			// if the node exists, then set it's value, and revalue it.
 			// this is better than deleting it, because it doesn't require
 			// more memory to be allocated
 			hitRatio = hitRatio + 1;
 			node.setValue(cacheObject);
-			revalueNode(node);
+			revalueNode(node, userKey);
 		} else {
-			System.out.println("Not Found");
+			System.out.println("NotFound " + userKey);
 			missRatio += 1;
 			shrinkToSize(getMaxSize() - 1);
-			createNode(userKey, cacheObject);
+			createNode(userKey, cacheObject, 0);
 		}
 
 		removeExpiredElements();
@@ -63,17 +63,28 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 		// checkFreeMemory();
 	}
 
-	@Override
-	protected void revalueNode(CacheNode node) {
+	protected void revalueNode(CacheNode node, Object userKey) {
 		LruNode lruNode = (LruNode) node;
 		LruCache lruCache = xlruCaches.get(lruNode.getCacheNumber());
+
+		System.out.println("Found in:" + lruNode.x);
 		if (lruNode.getCacheNumber() == x - 1) {
 			lruCache.revalueNode(lruNode);
+			System.out.println("Moving to:" + lruNode.x);
 		} else {
+			int newCacheNumber = lruNode.getCacheNumber() + 1;
+			xlruCaches.get(newCacheNumber).addObject(userKey, new Integer(1),
+					newCacheNumber);
+
+			System.out.println("Moving to:" + newCacheNumber + " value:"
+					+ lruNode.getValue());
 			lruCache.delete(lruNode);
-			xlruCaches.get(lruNode.getCacheNumber() + 1).addObject(
-					lruNode.getValue(), new Integer(1));
 		}
+	}
+
+	@Override
+	protected void revalueNode(CacheNode node) {
+		System.out.println("ERROR!!!");
 	}
 
 	@Override
@@ -94,8 +105,14 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 	}
 
 	@Override
+	protected CacheNode createNode(Object userKey, Object cacheObject, int x) {
+		return xlruCaches.get(0).createNode(userKey, cacheObject, x);
+	}
+
+	@Override
 	protected CacheNode createNode(Object userKey, Object cacheObject) {
-		return xlruCaches.get(0).createNode(userKey, cacheObject);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
