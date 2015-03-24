@@ -26,6 +26,18 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 
 	}
 
+	public double getHitRatio() {
+		return hitRatio;
+	}
+
+	public double getMissRatio() {
+		return missRatio;
+	}
+
+	public double getTotal() {
+		return total;
+	}
+
 	protected AbstractPolicyCache(String name, long timeoutMilliSeconds,
 			int maxSize) {
 
@@ -38,11 +50,10 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 
 		CacheNode node;
 		total += 1;
-
+		// System.out.println("CacheName:" + name);
 		node = findNodeByKey(userKey);
 
 		if (node != null) {
-
 			// if the node exists, then set it's value, and revalue it.
 			// this is better than deleting it, because it doesn't require
 			// more memory to be allocated
@@ -116,7 +127,7 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 	protected final void shrinkToSize(int desiredSize) {
 
 		while (size() > desiredSize) {
-			System.out.println("Shrinking");
+			// System.out.println("Shrinking");
 			// Log.info(getClass(), "desiredSize = " + desiredSize + " size=" +
 			// size());
 			removeLeastValuableNode();

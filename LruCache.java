@@ -76,7 +76,6 @@ class LruCache extends AbstractPolicyCache implements ReapableCache {
 	protected CacheNode createNode(Object userKey, Object cacheObject, int x) {
 
 		LruNode node = new LruNode();
-
 		node.key = userKey;
 		node.value = cacheObject;
 		node.fifoNode = fifo.addFirst(node);

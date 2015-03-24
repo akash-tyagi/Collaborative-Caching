@@ -3,6 +3,8 @@ package CacheImprovement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.codehaus.jackson.map.*;
 import org.codehaus.jackson.*;
@@ -19,9 +21,16 @@ public class TestCache {
 	public static void testLru5() throws Exception {
 
 		LruCache cache_lru = new LruCache("lru", 5000, 60000);
-		LfuCache cache_lfu = new LfuCache("lfu", 5000, 60000);
-		FifoCache cache_fifo = new FifoCache("fifo", 5000, 60000);
-		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 10, 5);
+
+		List<LruCache> lru_caches = new ArrayList<LruCache>();
+		lru_caches.add(new LruCache("lru1", 5000, 60000));
+		lru_caches.add(new LruCache("lru2", 5000, 60000));
+
+		ConsistenHashing<LruCache> collaborativeLruCaching = new ConsistenHashing<LruCache>(
+				10, lru_caches);
+		// LfuCache cache_lfu = new LfuCache("lfu", 5000, 60000);
+		// FifoCache cache_fifo = new FifoCache("fifo", 5000, 60000);
+		// SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 10, 5);
 		System.out.println("1");
 
 		// Nikhil Start
@@ -69,12 +78,17 @@ public class TestCache {
 										+ node.getValueAsText());
 								cache_lru.addObject(node.getValueAsText(),
 										new Integer(1));
+
+								collaborativeLruCaching
+										.get(node.getTextValue()).addObject(
+												node.getTextValue(),
+												new Integer(1));
 								// cache_lfu.addObject(node.getValueAsText(),
 								// new Integer(1));
 								// cache_fifo.addObject(node.getValueAsText(),
 								// new Integer(1));
-								cache_sxlru.addObject(node.getValueAsText(),
-										new Integer(1));
+								// cache_sxlru.addObject(node.getValueAsText(),
+								// new Integer(1));
 							}
 						} else {
 							System.out
@@ -97,8 +111,21 @@ public class TestCache {
 		// cache_lfu.CacheHitRatio();
 		// System.out.println("FIFO");
 		// cache_fifo.CacheHitRatio();
-		System.out.println("SxLru");
-		cache_sxlru.CacheHitRatio();
+		// System.out.println("SxLru");
+		// cache_sxlru.CacheHitRatio();
+
+		double hitRatio = 0;
+		double missRatio = 0;
+		double total = 0;
+		List<LruCache> caches = collaborativeLruCaching.getCaches();
+		for (LruCache lruCache : caches) {
+			total += lruCache.getTotal();
+			hitRatio += lruCache.getHitRatio();
+			missRatio += lruCache.getMissRatio();
+		}
+		System.out.println("Hit Ratio----->" + hitRatio / total);
+		System.out.println("MissRatio----->" + missRatio / total);
+		System.out.println("Total--------->" + total);
 
 		// Nikhil End
 
