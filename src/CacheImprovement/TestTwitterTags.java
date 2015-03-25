@@ -15,7 +15,7 @@ public class TestTwitterTags {
 	public static void main(String[] args) throws Exception {
 		LruCache cache_lru = new LruCache("lru", 5000, 60000);
 
-		ConsistenHashing collaborativeLruCaching = new ConsistenHashing(10, 2,
+		CollaborativeCache collaborativeLruCaching = new CollaborativeCache(10, 2,
 				5000, 60000);
 		LfuCache cache_lfu = new LfuCache("lfu", 5000, 60000);
 		FifoCache cache_fifo = new FifoCache("fifo", 5000, 60000);
@@ -41,8 +41,7 @@ public class TestTwitterTags {
 					String hashTag = (String) object;
 
 					cache_lru.addObject(hashTag, new Integer(1));
-					collaborativeLruCaching.get(hashTag).addObject(hashTag,
-							new Integer(1));
+					collaborativeLruCaching.addObject(hashTag, new Integer(1));
 					cache_lfu.addObject(hashTag, new Integer(1));
 					cache_fifo.addObject(hashTag, new Integer(1));
 					cache_sxlru.addObject(hashTag, new Integer(1));

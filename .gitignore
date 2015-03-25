@@ -3,5 +3,6 @@
 .settings
 /bin
 /bin/*
+/src/test
 /src/tweets
 /src/web-clicks
