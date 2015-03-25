@@ -50,7 +50,6 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 
 		CacheNode node;
 		total += 1;
-		// System.out.println("CacheName:" + name);
 		node = findNodeByKey(userKey);
 
 		if (node != null) {
