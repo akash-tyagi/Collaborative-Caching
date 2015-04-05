@@ -8,9 +8,11 @@ public class PriorityCache {
 	double missRatio;
 	double total;
 	int maxSize;
-	public final double alpha=0.8;
-	public final double beta=0.2;
-	
+	public final double alpha=1.2;
+	public final double beta=0.8;
+	int freq=1;
+	long rec=1;
+	String besturl="";
 	PriorityQueue<String> pcache;
 	HashMap<String,PriorityCacheNode> hm;
 	public PriorityCache(int s){
@@ -50,14 +52,16 @@ public class PriorityCache {
 		//node = findNodeByKey(userKey);
 		if (node != null) {
 			this.hitRatio += 1;
-			node.setValue(alpha,beta);
+			freq=Math.max(freq,node.frequency+1);
+			rec=Math.max(rec,System.currentTimeMillis()-node.recency);
+			node.setValue(alpha,beta,freq,rec);
 			this.hm.put(userKey, node);
 			this.pcache.remove(userKey);			
 			this.pcache.add(userKey);			
 		} else {
 			this.missRatio += 1;
-			double new_priority=alpha+beta*10;
-			node = new PriorityCacheNode(1,System.currentTimeMillis(),new_priority);
+			//double new_priority=alpha;
+			node = new PriorityCacheNode(1,System.currentTimeMillis(),0.0);
 			shrinkToSize(maxSize);
 			this.hm.put(userKey, node);
 			this.pcache.add(userKey);
@@ -68,6 +72,10 @@ public class PriorityCache {
 		System.out.println("Hit Ratio----->" + this.hitRatio / this.total);
 		System.out.println("MissRatio----->" + this.missRatio / this.total);
 		System.out.println("Total--------->" + this.total);
+		//System.out.println("freq--------->" + freq);
+		//System.out.println("url--------->" + besturl);		
+		//System.out.println("rec--------->" + rec);		
+		
 		//System.out.println("cache size--------->" + this.pcache.size());		
 	}
 	
