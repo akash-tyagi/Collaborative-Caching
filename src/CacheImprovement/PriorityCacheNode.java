@@ -5,6 +5,8 @@ public class PriorityCacheNode {
 	int frequency;
 	long recency;
 	double priority;
+	final int max_freq=150000;
+//	final long max_rec=30000;
 	public PriorityCacheNode(){
 //		key="";
 		frequency=0;
@@ -18,10 +20,16 @@ public class PriorityCacheNode {
 		recency=r;
 		priority=p;
 	}
-	public void setValue(double alpha, double beta){
+	public void setValue(double alpha, double beta,int freq,long rec){
 		this.frequency=this.frequency+1;
-		this.priority=alpha*this.frequency + beta*(System.currentTimeMillis()-this.recency);		
-		this.recency=System.currentTimeMillis();// change this
+		this.priority=alpha*((double)this.frequency/(double)max_freq) + beta*(1-(double)(System.currentTimeMillis()-this.recency)/(double)rec);		
+		this.recency=System.currentTimeMillis();
+//		System.out.println(this.priority);		
+//		System.out.println(this.frequency);
+//		System.out.println(System.currentTimeMillis()-this.recency);
+//		System.out.println(freq);
+//		System.out.println(rec);
+		
 	}
 }
 
