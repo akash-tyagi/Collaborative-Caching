@@ -1,19 +1,19 @@
 package CacheImprovement;
 
 public class PriorityCacheNode {
-	String key;
+//	String key;
 	int frequency;
 	long recency;
 	double priority;
 	public PriorityCacheNode(){
-		key="";
+//		key="";
 		frequency=0;
 		recency=0;
 		priority=0.0;
 	}
 	
-	public PriorityCacheNode(String u, int f, long r, double p){
-		key=u;
+	public PriorityCacheNode(int f, long r, double p){
+//		key=u;
 		frequency=f;
 		recency=r;
 		priority=p;
