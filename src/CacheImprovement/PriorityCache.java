@@ -8,8 +8,8 @@ public class PriorityCache {
 	double missRatio;
 	double total;
 	int maxSize;
-	public final double alpha=1.2;
-	public final double beta=0.8;
+	public final double alpha=0.99996;//700000;
+	public final double beta=0.00004;//25;
 	int freq=1;
 	long rec=1;
 	String besturl="";
@@ -72,9 +72,9 @@ public class PriorityCache {
 		System.out.println("Hit Ratio----->" + this.hitRatio / this.total);
 		System.out.println("MissRatio----->" + this.missRatio / this.total);
 		System.out.println("Total--------->" + this.total);
-		//System.out.println("freq--------->" + freq);
+		System.out.println("freq--------->" + freq);
 		//System.out.println("url--------->" + besturl);		
-		//System.out.println("rec--------->" + rec);		
+		System.out.println("rec--------->" + rec);		
 		
 		//System.out.println("cache size--------->" + this.pcache.size());		
 	}
