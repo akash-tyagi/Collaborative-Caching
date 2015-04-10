@@ -51,7 +51,6 @@ public abstract class AbstractPolicyCache implements ReapableCache {
 		CacheNode node;
 		total += 1;
 		node = findNodeByKey(userKey);
-
 		if (node != null) {
 			// if the node exists, then set it's value, and revalue it.
 			// this is better than deleting it, because it doesn't require

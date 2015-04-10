@@ -121,7 +121,6 @@ class LfuCache extends AbstractPolicyCache implements ReapableCache {
 		node.timeoutTime = System.currentTimeMillis()
 				+ getTimeoutMilliSeconds();
 		lowestNonEmptyLru = 0;
-
 		map.put(userKey, node);
 
 		return node;
@@ -197,7 +196,6 @@ class LfuCache extends AbstractPolicyCache implements ReapableCache {
 
 	@Override
 	protected CacheNode createNode(Object userKey, Object cacheObject, int x) {
-		// TODO Auto-generated method stub
-		return null;
+		return createNode(userKey, cacheObject);
 	}
 }

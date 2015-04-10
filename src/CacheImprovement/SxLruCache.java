@@ -30,7 +30,6 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 		for (LruCache lruCache : xlruCaches) {
 			lruNode = (LruNode) lruCache.findNodeByKey(key);
 			if (lruNode != null) {
-				System.out.println("Name:" + lruCache.name);
 				return lruNode;
 			}
 		}
@@ -44,7 +43,6 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 		node = findNodeByKey(userKey);
 
 		if (node != null) {
-			System.out.println("Found " + userKey);
 			// if the node exists, then set it's value, and revalue it.
 			// this is better than deleting it, because it doesn't require
 			// more memory to be allocated
@@ -52,7 +50,6 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 			node.setValue(cacheObject);
 			revalueNode(node, userKey);
 		} else {
-			System.out.println("NotFound " + userKey);
 			missRatio += 1;
 			shrinkToSize(getMaxSize() - 1);
 			createNode(userKey, cacheObject, 0);
@@ -67,17 +64,13 @@ public class SxLruCache extends AbstractPolicyCache implements ReapableCache {
 		LruNode lruNode = (LruNode) node;
 		LruCache lruCache = xlruCaches.get(lruNode.getCacheNumber());
 
-		System.out.println("Found in:" + lruNode.x);
 		if (lruNode.getCacheNumber() == x - 1) {
 			lruCache.revalueNode(lruNode);
-			System.out.println("Moving to:" + lruNode.x);
 		} else {
 			int newCacheNumber = lruNode.getCacheNumber() + 1;
 			xlruCaches.get(newCacheNumber).addObject(userKey, new Integer(1),
 					newCacheNumber);
 
-			System.out.println("Moving to:" + newCacheNumber + " value:"
-					+ lruNode.getValue());
 			lruCache.delete(lruNode);
 		}
 	}

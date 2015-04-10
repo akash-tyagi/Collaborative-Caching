@@ -23,8 +23,10 @@ public class TestWebClicks {
 		LfuCache cache_lfu = new LfuCache("lfu", 5000, CACHE_SIZE);
 		FifoCache cache_fifo = new FifoCache("fifo", 5000, CACHE_SIZE);
 		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, CACHE_SIZE, 5);
+		CollaborativeCache collaborativeLruCaching = new CollaborativeCache(10,
+				2, 5000, CACHE_SIZE);
 
-		String target_dir = "/Users/nishant/Documents/workspace-OS_project/Collaborative_Caching/test_data";
+		String target_dir = "/home/akash/workspace/CollaborativeCache/src/test";
 		File dir = new File(target_dir);
 		File[] jsonFiles = dir.listFiles();
 
@@ -41,11 +43,12 @@ public class TestWebClicks {
 				String link = (String) jsonObject.get("to");
 
 				cache_lru.addObject(link, new Integer(1));
-				// cache_lfu.addObject(link, new Integer(1));
-				// cache_fifo.addObject(link, new Integer(1));
-				// cache_sxlru.addObject(link, new Integer(1));
-				// cache_collab.addObject(link, new Integer(1));
+				cache_lfu.addObject(link, new Integer(1));
+				cache_fifo.addObject(link, new Integer(1));
+				cache_sxlru.addObject(link, new Integer(1));
 				cache_pr.addObject(link);
+				collaborativeLruCaching.addObject(link, new Integer(1));
+
 				line = br.readLine();
 			}
 			br.close();
@@ -53,15 +56,16 @@ public class TestWebClicks {
 
 		System.out.println("LRU");
 		cache_lru.CacheHitRatio();
-		// System.out.println("LFU");
-		// cache_lfu.CacheHitRatio();
-		// System.out.println("FIFO");
-		// cache_fifo.CacheHitRatio();
-		// System.out.println("SxLru");
-		// cache_sxlru.CacheHitRatio();
+		System.out.println("LFU");
+		cache_lfu.CacheHitRatio();
+		System.out.println("FIFO");
+		cache_fifo.CacheHitRatio();
+		System.out.println("SxLru");
+		cache_sxlru.CacheHitRatio();
 		System.out.println("Priority Caching");
-		// cache_collab.CacheHitRatio();
 		cache_pr.CacheHitRatio();
+		System.out.println("Collab Caching");
+		collaborativeLruCaching.CacheHitRatio();
 
 	}
 }

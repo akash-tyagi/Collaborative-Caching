@@ -27,9 +27,7 @@ public class CollaborativeCache {
 	}
 
 	private void add(LruCache node, int startNum) {
-		System.out.println("\n\n\n " + startNum);
 		for (int i = 0; i < numberOfReplicas; i++) {
-			System.out.println(startNum);
 			circle.put(startNum, node);
 			startNum += totalNodes;
 		}
@@ -45,7 +43,6 @@ public class CollaborativeCache {
 		}
 
 		int hash = getHashValue(key.toString());
-		// System.out.println(circle.get(hash).name + ":" + hash);
 		return circle.get(hash);
 	}
 

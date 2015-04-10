@@ -16,8 +16,6 @@ class LruCache extends AbstractPolicyCache implements ReapableCache {
 		map = MapFactory.createMap(maxSize);
 		fifo = new LinkedList();
 		lru = new LinkedList();
-
-		System.out.println("LRU size:" + maxSize);
 	}
 
 	protected CacheNode findNodeByKey(Object key) {
