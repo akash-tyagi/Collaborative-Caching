@@ -13,14 +13,17 @@ import org.json.simple.parser.JSONParser;
 public class TestTwitterTags {
 
 	public static void main(String[] args) throws Exception {
-		LruCache cache_lru = new LruCache("lru", 5000, 15000);
+		int CACHE_SIZE = 500;
 
-		//CollaborativeCache collaborativeLruCaching = new CollaborativeCache(10, 2,
-			//	5000, 60000);
-//		LfuCache cache_lfu = new LfuCache("lfu", 5000, 10000);
-//		FifoCache cache_fifo = new FifoCache("fifo", 5000, 10000);
-		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, 15000,2);
-		PriorityCache cache_pr = new PriorityCache(15000);
+		LruCache cache_lru = new LruCache("lru", 5000, CACHE_SIZE);
+
+		// CollaborativeCache collaborativeLruCaching = new
+		// CollaborativeCache(10,
+		// 2, 5000, CACHE_SIZE);
+		// LfuCache cache_lfu = new LfuCache("lfu", 5000, CACHE_SIZE);
+		// FifoCache cache_fifo = new FifoCache("fifo", 5000, CACHE_SIZE);
+		SxLruCache cache_sxlru = new SxLruCache("sxlru", 5000, CACHE_SIZE, 2);
+		PriorityCache cache_pr = new PriorityCache(CACHE_SIZE);
 
 		// Nikhil Start
 		String target_dir = "/Users/nishant/Documents/workspace-OS_project/Collaborative_Caching/test_data";
@@ -41,10 +44,11 @@ public class TestTwitterTags {
 				for (Object object : tagsArray) {
 					String hashTag = (String) object;
 
-				cache_lru.addObject(hashTag, new Integer(1));
-////					//collaborativeLruCaching.addObject(hashTag, new Integer(1));
-//					cache_lfu.addObject(hashTag, new Integer(1));
-//					cache_fifo.addObject(hashTag, new Integer(1));
+					cache_lru.addObject(hashTag, new Integer(1));
+					// // //collaborativeLruCaching.addObject(hashTag, new
+					// Integer(1));
+					// cache_lfu.addObject(hashTag, new Integer(1));
+					// cache_fifo.addObject(hashTag, new Integer(1));
 					cache_sxlru.addObject(hashTag, new Integer(1));
 					cache_pr.addObject(hashTag);
 				}
@@ -54,14 +58,14 @@ public class TestTwitterTags {
 
 		System.out.println("LRU");
 		cache_lru.CacheHitRatio();
-//		System.out.println("LFU");
-//		cache_lfu.CacheHitRatio();
-//		System.out.println("FIFO");
-//		cache_fifo.CacheHitRatio();
+		// System.out.println("LFU");
+		// cache_lfu.CacheHitRatio();
+		// System.out.println("FIFO");
+		// cache_fifo.CacheHitRatio();
 		System.out.println("SxLru");
 		cache_sxlru.CacheHitRatio();
 		System.out.println("PriorityCache");
-		cache_pr.CacheHitRatio();		
+		cache_pr.CacheHitRatio();
 
 	}
 
