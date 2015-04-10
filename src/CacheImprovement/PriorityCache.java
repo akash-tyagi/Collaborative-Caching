@@ -9,7 +9,7 @@ public class PriorityCache {
 	int maxSize;
 
 	int freq = 1;
-	long rec = 1;
+	long rec = 0;
 	String besturl = "";
 	PriorityQueue<String> pcache;
 	HashMap<String, PriorityCacheNode> hm;
@@ -19,6 +19,7 @@ public class PriorityCache {
 		this.hitRatio = 0;
 		this.missRatio = 0;
 		this.total = 0;
+		this.rec = 0;
 		this.hm = new HashMap<String, PriorityCacheNode>();
 		this.pcache = new PriorityQueue<String>(maxSize,
 				new Comparator<String>() {
@@ -47,23 +48,38 @@ public class PriorityCache {
 		if (this.hm.containsKey(userKey)) {
 			node = this.hm.get(userKey);
 		}
+		rec++;
 
-		// node = findNodeByKey(userKey);
 		if (node != null) {
 			this.hitRatio += 1;
 			freq = Math.max(freq, node.frequency + 1);
-			rec = Math.max(rec, System.currentTimeMillis() - node.recency);
 			node.setValue(freq, rec);
 			this.hm.put(userKey, node);
 			this.pcache.remove(userKey);
 			this.pcache.add(userKey);
 		} else {
 			this.missRatio += 1;
-			// double new_priority=alpha;
-			node = new PriorityCacheNode(1, System.currentTimeMillis(), 0.0);
+			node = new PriorityCacheNode(1, rec, 0.0);
 			shrinkToSize(maxSize);
 			this.hm.put(userKey, node);
 			this.pcache.add(userKey);
+		}
+
+		removeExpiredElements();
+
+	}
+
+	private void removeExpiredElements() {
+		int i = 0;
+		while (pcache.peek() != null && i++ < 10) {
+			String key = pcache.peek();
+			PriorityCacheNode node = hm.get(key);
+			if (rec - node.recency > 50000) {
+				System.out.println("deleting key$$$$$$$$:" + key);
+				pcache.poll();
+				continue;
+			}
+			break;
 		}
 	}
 
@@ -74,6 +90,9 @@ public class PriorityCache {
 		System.out.println("freq--------->" + freq);
 		// System.out.println("url--------->" + besturl);
 		System.out.println("rec--------->" + rec);
+		System.out.println("max prio " + PriorityCacheNode.max_prio);
+		System.out.println("max freq " + PriorityCacheNode.max_freq);
+		System.out.println("max rec " + PriorityCacheNode.max_rec);
 
 		// System.out.println("cache size--------->" + this.pcache.size());
 	}
